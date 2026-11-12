@@ -23,10 +23,10 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore NuGet packages
-        run: dotnet restore CustomerManagement.sln
+        run: dotnet restore CustomerManagement.slnx
 
       - name: Build solution
-        run: dotnet build CustomerManagement.sln --configuration Release --no-restore
+        run: dotnet build CustomerManagement.slnx --configuration Release --no-restore
 
       - name: Run unit tests
-        run: dotnet test CustomerManagement.sln --configuration Release --no-build
+        run: dotnet test CustomerManagement.slnx --configuration Release --no-build
