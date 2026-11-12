@@ -30,3 +30,20 @@ jobs:
 
       - name: Run unit tests
         run: dotnet test CustomerManagement.slnx --configuration Release --no-build
+
+      - name: Publish Customer API
+        run: dotnet publish CustomerManagement.API/CustomerManagement.API.csproj --configuration Release --no-build -o ./publish/customer-api
+
+      - name: Publish Order API
+        run: dotnet publish OrderManagement.API/OrderManagement.API.csproj --configuration Release --no-build -o ./publish/order-api
+
+      - name: Publish Blazor Web
+        run: dotnet publish CustomerManagement.Web/CustomerManagement.Web.csproj --configuration Release --no-build -o ./publish/customer-web
+
+      - name: Upload deployment artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CustomerManagement-Deployment
+          path: ./publish/
+          retention-days: 7
+
