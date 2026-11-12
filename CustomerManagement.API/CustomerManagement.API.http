@@ -1,0 +1,99 @@
+
+@CustomerManagement.API_HostAddress = http://localhost:5123
+
+### 1. Get All Customers
+GET {{CustomerManagement.API_HostAddress}}/api/v1/Customer
+Accept: application/json
+
+###
+
+### 2. Get Customer By ID
+GET {{CustomerManagement.API_HostAddress}}/api/v1/Customer/1
+Accept: application/json
+
+###
+
+### 3. Create Customer
+POST {{CustomerManagement.API_HostAddress}}/api/v1/Customer
+Content-Type: application/json
+
+{
+  "customerName": "Priya Sharma",
+  "email": "priya@gmail.com",
+  "mobile": "9876543210",
+  "city": "Chennai"
+}
+
+###
+
+### 4. Update Customer
+PUT {{CustomerManagement.API_HostAddress}}/api/v1/Customer/1
+Content-Type: application/json
+
+{
+  "customerName": "Priya Sharma Updated",
+  "email": "priya.updated@gmail.com",
+  "mobile": "9876543210",
+  "city": "Chennai",
+  "isActive": true
+}
+
+###
+
+### 5. Delete Customer
+DELETE {{CustomerManagement.API_HostAddress}}/api/v1/Customer/1
+Accept: application/json
+
+###
+
+### 6. Pagination - Page 1
+GET {{CustomerManagement.API_HostAddress}}/api/v1/Customer/paged?pageNumber=1&pageSize=5
+Accept: application/json
+
+###
+
+### 7. Pagination - Page 2
+GET {{CustomerManagement.API_HostAddress}}/api/v1/Customer/paged?pageNumber=2&pageSize=5
+Accept: application/json
+
+###
+
+### 8. Pagination - Invalid Page
+GET {{CustomerManagement.API_HostAddress}}/api/v1/Customer/paged?pageNumber=0&pageSize=5
+Accept: application/json
+
+###
+
+### 9. Search - Customer Name
+GET {{CustomerManagement.API_HostAddress}}/api/v1/Customer/paged?pageNumber=1&pageSize=5&search=Priya
+Accept: application/json
+
+###
+
+### 10. Filter - City
+GET {{CustomerManagement.API_HostAddress}}/api/v1/Customer/paged?pageNumber=1&pageSize=5&city=Chennai
+Accept: application/json
+
+###
+
+### 11. Search + City Filter
+GET {{CustomerManagement.API_HostAddress}}/api/v1/Customer/paged?pageNumber=1&pageSize=5&search=Priya&city=Chennai
+Accept: application/json
+
+###
+
+### 12. Search + Pagination - Page 2
+GET {{CustomerManagement.API_HostAddress}}/api/v1/Customer/paged?pageNumber=2&pageSize=5&search=Priya
+Accept: application/json
+
+###
+
+### 13. API Version 1
+GET {{CustomerManagement.API_HostAddress}}/api/v1/Customer
+Accept: application/json
+
+###
+
+### 14. API Version 2
+GET {{CustomerManagement.API_HostAddress}}/api/v2/Customer
+Accept: application/json

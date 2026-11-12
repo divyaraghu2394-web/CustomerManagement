@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": "CustomerManagement.AppHost/CustomerManagement.AppHost.csproj"
+  }
+}
