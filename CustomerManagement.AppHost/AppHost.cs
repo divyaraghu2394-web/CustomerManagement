@@ -17,6 +17,7 @@ builder.AddProject<Projects.OrderManagement_API>(
 
 // Blazor Web Application
 builder.AddProject<Projects.CustomerManagement_Web>(
-    "customermanagement-web");
+    "customermanagement-web")
+    .WithReference(customerApi);
 
 builder.Build().Run();

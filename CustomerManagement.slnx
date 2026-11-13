@@ -1,7 +1,5 @@
 <Solution>
-  <Folder Name="/Solution Items/">
-    <File Path=".github" />
-  </Folder>
+  <Folder Name="/Solution Items/" />
   <Project Path="CustomerManagement.API/CustomerManagement.API.csproj" />
   <Project Path="CustomerManagement.AppHost/CustomerManagement.AppHost.csproj" Id="16e871a4-eb0a-466e-991b-42566eaeb345" />
   <Project Path="CustomerManagement.Core/CustomerManagement.Core.csproj" />

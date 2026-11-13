@@ -1,0 +1,313 @@
+﻿@page "/customers"
+@rendermode InteractiveServer
+
+@using CustomerManagement.Web.Models
+@using System.Net.Http.Json
+
+@inject IHttpClientFactory HttpClientFactory
+
+<h3>Customer Management</h3>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-info">@message</div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="AddNewCustomer">
+        Add Customer
+    </button>
+</div>
+
+@if (showForm)
+{
+    <div class="card p-3 mb-4">
+
+        <h5>@(isEditMode ? "Edit Customer" : "Add Customer")</h5>
+
+        <EditForm Model="formModel" OnValidSubmit="SaveCustomer">
+
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label">Customer Name</label>
+                <InputText class="form-control"
+                           @bind-Value="formModel.CustomerName" />
+                <ValidationMessage For="@(() => formModel.CustomerName)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <InputText class="form-control"
+                           @bind-Value="formModel.Email" />
+                <ValidationMessage For="@(() => formModel.Email)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mobile</label>
+                <InputText class="form-control"
+                           @bind-Value="formModel.Mobile" />
+                <ValidationMessage For="@(() => formModel.Mobile)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">City</label>
+                <InputText class="form-control"
+                           @bind-Value="formModel.City" />
+                <ValidationMessage For="@(() => formModel.City)" />
+            </div>
+
+            <button type="submit" class="btn btn-success"
+                    disabled="@isSaving">
+                @(isEditMode ? "Update" : "Save")
+            </button>
+
+            <button type="button" class="btn btn-secondary ms-2"
+                    @onclick="CancelForm">
+                Cancel
+            </button>
+
+        </EditForm>
+    </div>
+}
+
+<h5>Customer List</h5>
+
+@if (isLoading)
+{
+    <p>Loading customers...</p>
+}
+else if (customers.Count == 0)
+{
+    <p>No customers found.</p>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>City</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var customer in customers)
+            {
+                <tr>
+                    <td>@customer.CustomerId</td>
+                    <td>@customer.CustomerName</td>
+                    <td>@customer.Email</td>
+                    <td>@customer.Mobile</td>
+                    <td>@customer.City</td>
+
+                    <td>
+                        <button class="btn btn-warning btn-sm"
+                                @onclick="() => EditCustomer(customer)">
+                            Edit
+                        </button>
+
+                        <button class="btn btn-danger btn-sm ms-1"
+                                @onclick="() => DeleteCustomer(customer.CustomerId)">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+}
+
+@code {
+
+    private List<CustomerDto> customers = new();
+
+    private CustomerFormModel formModel = new();
+
+    private bool showForm;
+    private bool isEditMode;
+    private bool isLoading;
+    private bool isSaving;
+
+    private int selectedCustomerId;
+
+    private string? message;
+    private string? errorMessage;
+
+    private const string ApiUrl = "api/v1/customer/";
+
+    private HttpClient GetApiClient()
+    {
+        return HttpClientFactory.CreateClient("CustomerAPI");
+    }
+
+    // READ: Get all customers
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCustomers();
+    }
+
+    private async Task LoadCustomers()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            var client = GetApiClient();
+
+            customers = await client.GetFromJsonAsync<List<CustomerDto>>(
+                ApiUrl) ?? new List<CustomerDto>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Unable to load customers: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // CREATE: Show empty form
+    private void AddNewCustomer()
+    {
+        formModel = new CustomerFormModel();
+
+        selectedCustomerId = 0;
+        isEditMode = false;
+
+        message = null;
+        errorMessage = null;
+
+        showForm = true;
+    }
+
+    // EDIT: Load selected customer into form
+    private void EditCustomer(CustomerDto customer)
+    {
+        selectedCustomerId = customer.CustomerId;
+
+        formModel = new CustomerFormModel
+        {
+            CustomerName = customer.CustomerName,
+            Email = customer.Email,
+            Mobile = customer.Mobile,
+            City = customer.City
+        };
+
+        isEditMode = true;
+
+        message = null;
+        errorMessage = null;
+
+        showForm = true;
+    }
+
+    // CREATE / UPDATE
+    private async Task SaveCustomer()
+    {
+        try
+        {
+            isSaving = true;
+            errorMessage = null;
+            message = null;
+
+            var client = GetApiClient();
+
+            HttpResponseMessage response;
+
+            if (isEditMode)
+            {
+                // UPDATE
+                response = await client.PutAsJsonAsync(
+                    $"{ApiUrl}{selectedCustomerId}",
+                    formModel);
+            }
+            else
+            {
+                // CREATE
+                response = await client.PostAsJsonAsync(
+                    ApiUrl,
+                    formModel);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                message = isEditMode
+                    ? "Customer updated successfully."
+                    : "Customer created successfully.";
+
+                showForm = false;
+
+                await LoadCustomers();
+            }
+            else
+            {
+                var responseText = await response.Content.ReadAsStringAsync();
+
+                errorMessage =
+                    $"API Error: {(int)response.StatusCode} - {responseText}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Save failed: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    // DELETE
+    private async Task DeleteCustomer(int customerId)
+    {
+        try
+        {
+            message = null;
+            errorMessage = null;
+
+            var client = GetApiClient();
+
+            var response = await client.DeleteAsync(
+                $"{ApiUrl}{customerId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                message = "Customer deleted successfully.";
+
+                await LoadCustomers();
+            }
+            else
+            {
+                var responseText = await response.Content.ReadAsStringAsync();
+
+                errorMessage =
+                    $"Delete failed: {(int)response.StatusCode} - {responseText}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Delete failed: {ex.Message}";
+        }
+    }
+
+    private void CancelForm()
+    {
+        showForm = false;
+        errorMessage = null;
+    }
+}

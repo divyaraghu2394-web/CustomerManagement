@@ -26,25 +26,34 @@ public static class Extensions
 
         builder.Services.AddServiceDiscovery();
 
+
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
             // Turn on resilience by default
             http.AddStandardResilienceHandler(options =>
             {
+                // Retry Configuration
                 options.Retry.MaxRetryAttempts = 2;
                 options.Retry.Delay = TimeSpan.FromSeconds(1);
                 options.Retry.UseJitter = false;
 
-                // Timeout for each individual attempt
+                // Timeout Configuration
                 options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(5);
-
-                // Maximum time for the complete request, including retries
                 options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(15);
+
+                // Circuit Breaker Configuration
+                options.CircuitBreaker.FailureRatio = 0.5;
+                options.CircuitBreaker.MinimumThroughput = 4;
+                options.CircuitBreaker.SamplingDuration =
+                    TimeSpan.FromSeconds(10);
+                options.CircuitBreaker.BreakDuration =
+                    TimeSpan.FromSeconds(15);
             });
 
             // Turn on service discovery by default
             http.AddServiceDiscovery();
         });
+
 
         // Uncomment the following to restrict the allowed schemes for service discovery.
         // builder.Services.Configure<ServiceDiscoveryOptions>(options =>

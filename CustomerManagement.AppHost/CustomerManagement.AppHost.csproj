@@ -10,6 +10,11 @@
   </PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.6.5" />
+	  <PackageReference Include="Aspire.Hosting.Redis" Version="13.6.5" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\CustomerManagement.API\CustomerManagement.API.csproj" />
 		<ProjectReference Include="..\CustomerManagement.Web\CustomerManagement.Web.csproj" />
 		<ProjectReference Include="..\OrderManagement.API\OrderManagement.API.csproj" />

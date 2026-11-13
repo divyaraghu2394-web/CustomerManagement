@@ -1,17 +1,32 @@
 
-using CustomerManagement.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using CustomerManagement.Core.Interfaces;
-using CustomerManagement.Infrastructure.Repositories;
-using CustomerManagement.Core.Services;
-using CustomerManagement.Core.Mapping;
-using FluentValidation;
-using CustomerManagement.Core.Validators;
 using Asp.Versioning;
+using CustomerManagement.Core.Interfaces;
+using CustomerManagement.Core.Mapping;
+using CustomerManagement.Core.Services;
+using CustomerManagement.Core.Validators;
+using CustomerManagement.Infrastructure.Data;
+using CustomerManagement.Infrastructure.Repositories;
+using FluentValidation;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Rate Limiting Configuration
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("CustomerPolicy", limiter =>
+    {
+        limiter.PermitLimit = 5;
+        limiter.Window = TimeSpan.FromSeconds(10);
+        limiter.QueueLimit = 0;
+        limiter.AutoReplenishment = true;
+    });
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
 
 builder.AddServiceDefaults();
 
@@ -65,6 +80,8 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 
 var app = builder.Build();
+
+app.UseRateLimiter();
 
 var environmentName = Environment.GetEnvironmentVariable("APP_ENV_NAME");
 

@@ -1,11 +1,12 @@
 ﻿
+using Asp.Versioning;
 using AutoMapper;
 using CustomerManagement.Core.DTOs;
 using CustomerManagement.Core.Models;
 using CustomerManagement.Core.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace CustomerManagement.API.Controllers
 {
@@ -13,6 +14,7 @@ namespace CustomerManagement.API.Controllers
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
+    [EnableRateLimiting("CustomerPolicy")]   
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerService _customerService;
