@@ -1,4 +1,4 @@
-﻿<Project Sdk="Aspire.AppHost.Sdk/13.6.4">
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.6.5">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -6,16 +6,17 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AspireUseCliBundle>true</AspireUseCliBundle>
-	  <UserSecretsId>6346bf53-f5a1-472f-a602-596165a4412c</UserSecretsId>
-  </PropertyGroup>
+		<UserSecretsId>6346bf53-f5a1-472f-a602-596165a4412c</UserSecretsId>
+	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.6.5" />
-	  <PackageReference Include="Aspire.Hosting.Redis" Version="13.6.5" />
+		<PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.6.5" />
+		<PackageReference Include="Aspire.Hosting.Redis" Version="13.6.5" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\CustomerManagement.API\CustomerManagement.API.csproj" />
+		<ProjectReference Include="..\CustomerManagement.Gateway\CustomerManagement.Gateway.csproj" />
 		<ProjectReference Include="..\CustomerManagement.Web\CustomerManagement.Web.csproj" />
 		<ProjectReference Include="..\OrderManagement.API\OrderManagement.API.csproj" />
 	</ItemGroup>

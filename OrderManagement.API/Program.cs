@@ -1,21 +1,50 @@
+
+using Microsoft.EntityFrameworkCore;
+using OrderManagement.API.Data;
+using OrderManagement.API.Messaging;
+using System.Reflection;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Customer API communication
+builder.Services.AddHttpClient("CustomerService", client =>
+{
+    client.BaseAddress = new Uri("https+http://customermanagement-api");
+});
 
 builder.Services.AddHttpClient("CustomerApi", client =>
 {
     client.BaseAddress = new Uri("https+http://customermanagement-api");
 });
 
+// Aspire service defaults
 builder.AddServiceDefaults();
 
-// Add services to the container.
+// Order database connection
+var orderConnectionString =
+    builder.Configuration.GetConnectionString("OrderConnection");
 
+if (string.IsNullOrWhiteSpace(orderConnectionString))
+{
+    throw new InvalidOperationException(
+        "OrderConnection connection string is missing.");
+}
+
+builder.Services.AddDbContext<OrderDbContext>(options =>
+    options.UseSqlServer(orderConnectionString));
+
+// Controllers and API documentation
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// RabbitMQ Consumer Registration
+builder.Services.AddHostedService<CustomerCreatedConsumer>();
 
 var app = builder.Build();
 
-app.MapGet("/api/orders/customer-test", async (IHttpClientFactory httpClientFactory) =>
+// Customer API test
+app.MapGet("/api/orders/customer-test", async (
+    IHttpClientFactory httpClientFactory) =>
 {
     var client = httpClientFactory.CreateClient("CustomerApi");
 
@@ -26,10 +55,10 @@ app.MapGet("/api/orders/customer-test", async (IHttpClientFactory httpClientFact
     return Results.Content(
         result,
         "application/json",
-        statusCode: (int)response.StatusCode
-    );
+        statusCode: (int)response.StatusCode);
 });
 
+// Retry test
 app.MapGet("/api/orders/retry-test", async (
     IHttpClientFactory httpClientFactory,
     ILogger<Program> logger) =>
@@ -40,12 +69,14 @@ app.MapGet("/api/orders/retry-test", async (
 
     var response = await client.GetAsync("/api/test-failure");
 
-    logger.LogInformation("Customer API returned: {StatusCode}",
+    logger.LogInformation(
+        "Customer API returned: {StatusCode}",
         (int)response.StatusCode);
 
     return Results.StatusCode((int)response.StatusCode);
 });
 
+// Timeout test
 app.MapGet("/api/orders/timeout-test", async (
     IHttpClientFactory httpClientFactory,
     ILogger<Program> logger) =>
@@ -70,9 +101,10 @@ app.MapGet("/api/orders/timeout-test", async (
     }
 });
 
+// Aspire health checks
 app.MapDefaultEndpoints();
 
-// Configure the HTTP request pipeline.
+// OpenAPI JSON
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -82,6 +114,19 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapControllers();
+// Order CRUD controllers
+try
+{
+    app.MapControllers();
+}
+catch (ReflectionTypeLoadException ex)
+{
+    foreach (var loaderException in ex.LoaderExceptions)
+    {
+        Console.WriteLine(loaderException?.ToString());
+    }
+
+    throw;
+}
 
 app.Run();

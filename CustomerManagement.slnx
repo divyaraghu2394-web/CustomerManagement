@@ -3,9 +3,11 @@
   <Project Path="CustomerManagement.API/CustomerManagement.API.csproj" />
   <Project Path="CustomerManagement.AppHost/CustomerManagement.AppHost.csproj" Id="16e871a4-eb0a-466e-991b-42566eaeb345" />
   <Project Path="CustomerManagement.Core/CustomerManagement.Core.csproj" />
+  <Project Path="CustomerManagement.Gateway/CustomerManagement.Gateway.csproj" />
   <Project Path="CustomerManagement.Infrastructure/CustomerManagement.Infrastructure.csproj" />
   <Project Path="CustomerManagement.ServiceDefaults/CustomerManagement.ServiceDefaults.csproj" />
   <Project Path="CustomerManagement.Tests/CustomerManagement.Tests.csproj" />
   <Project Path="CustomerManagement.Web/CustomerManagement.Web.csproj" />
+  <Project Path="Messaging.Contracts/Messaging.Contracts.csproj" />
   <Project Path="OrderManagement.API/OrderManagement.API.csproj" />
 </Solution>

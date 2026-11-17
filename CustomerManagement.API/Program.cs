@@ -1,5 +1,6 @@
 
 using Asp.Versioning;
+using CustomerManagement.API.Messaging;
 using CustomerManagement.Core.Interfaces;
 using CustomerManagement.Core.Mapping;
 using CustomerManagement.Core.Services;
@@ -7,10 +8,10 @@ using CustomerManagement.Core.Validators;
 using CustomerManagement.Infrastructure.Data;
 using CustomerManagement.Infrastructure.Repositories;
 using FluentValidation;
+using Messaging.Contracts;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,8 +44,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// Add services to the container.
-
+// Add services
 builder.Services.AddControllers();
 
 builder.Services.AddHealthChecks()
@@ -78,6 +78,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 
+// RabbitMQ Publisher Registration
+builder.Services.AddSingleton<RabbitMqPublisher>();
 
 var app = builder.Build();
 
@@ -103,7 +105,24 @@ Log.Information("Aspire test: Customer Management API started");
 
 app.MapDefaultEndpoints();
 
-// Configure the HTTP request pipeline.
+// RabbitMQ Test Endpoint
+app.MapPost("/api/messaging/test-customer-event",
+    (RabbitMqPublisher publisher) =>
+    {
+        var customerEvent = new CustomerCreatedEvent
+        {
+            CustomerId = 101,
+            CustomerName = "Test Customer",
+            Email = "test@example.com",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        publisher.PublishCustomerCreated(customerEvent);
+
+        return Results.Ok("Customer event published successfully");
+    });
+
+// Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
