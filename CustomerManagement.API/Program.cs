@@ -15,6 +15,8 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton<KafkaProducer>();
+
 // Rate Limiting Configuration
 builder.Services.AddRateLimiter(options =>
 {
@@ -121,6 +123,27 @@ app.MapPost("/api/messaging/test-customer-event",
 
         return Results.Ok("Customer event published successfully");
     });
+
+app.MapPost("/api/kafka/test", async (KafkaProducer producer) =>
+{
+    var customerEvent = new CustomerEvent
+    {
+        CustomerId = 101,
+        Name = "Divya",
+        Email = "divya@example.com",
+        EventType = "CustomerCreated"
+    };
+
+    await producer.PublishAsync(
+        "customer-events",
+        "101",
+        customerEvent);
+
+    return Results.Ok(new
+    {
+        Message = "JSON event published successfully"
+    });
+});
 
 // Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())

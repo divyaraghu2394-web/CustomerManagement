@@ -6,6 +6,8 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
 // Customer API communication
 builder.Services.AddHttpClient("CustomerService", client =>
 {
@@ -39,6 +41,7 @@ builder.Services.AddOpenApi();
 
 // RabbitMQ Consumer Registration
 builder.Services.AddHostedService<CustomerCreatedConsumer>();
+builder.Services.AddHostedService<KafkaConsumer>();
 
 var app = builder.Build();
 
